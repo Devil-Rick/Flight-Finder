@@ -71,17 +71,3 @@ class DataManager:
                              headers=self.header,
                              json=add_params)
         sheet_add.raise_for_status()
-
-# ------------------- OUTPUT Response ------------------- #
-# {'prices': [
-#   {'city': 'Paris', 'iataCode': 'PHT', 'lowestPrice (indianRupees)': 40000, 'id': 2},
-#   {'city': 'Berlin', 'iataCode': 'BER', 'lowestPrice (indianRupees)': 40000, 'id': 3},
-#   {'city': 'Tokyo', 'iataCode': 'TYO', 'lowestPrice (indianRupees)': 40000, 'id': 4},
-#   {'city': 'Sydney', 'iataCode': 'SYD', 'lowestPrice (indianRupees)': 40000, 'id': 5},
-#   {'city': 'Istanbul', 'iataCode': 'IST', 'lowestPrice (indianRupees)': 40000, 'id': 6},
-#   {'city': 'Kuala Lumpur', 'iataCode': 'KUL', 'lowestPrice (indianRupees)': 40000, 'id': 7},
-#   {'city': 'New York', 'iataCode': 'NYS', 'lowestPrice (indianRupees)': 40000, 'id': 8},
-#   {'city': 'San Francisco', 'iataCode': 'SFO', 'lowestPrice (indianRupees)': 40000, 'id': 9},
-#   {'city': 'Cape Town', 'iataCode': 'CPT', 'lowestPrice (indianRupees)': 40000, 'id': 10}
-#   ]
-# }

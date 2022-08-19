@@ -1,5 +1,6 @@
 import config
 import requests as req
+import tabulate as tb
 from datetime import date as dt
 from dateutil.relativedelta import relativedelta
 
@@ -14,63 +15,53 @@ class FlightSearch:
         self.from_date = (dt.today() + relativedelta(days=+1)).strftime("%d/%m/%Y")
         self.to_date = (dt.today() + relativedelta(days=+1, months=+6)).strftime("%d/%m/%Y")
         self.from_place = "CCU"
+        self.flight_result = []
 
-    def search_flight(self):
+    def search_flight(self, sheet_data):
         search_url = f"{self.url}/v2/search"
-        search_params = {
-            "fly_from": self.from_place,
-            "fly_to": "BOM",
-            "date_from": self.from_date,
-            "date_to": self.to_date,
-            "adults": "1",
-            "curr": "INR",
-            "selected_cabins": "M",
-            "limit": 3
-        }
-        search_response = req.get(url=search_url, headers=self.header,
-                                  params=search_params)
-        # print(search_response.json()["data"])
-        for i in search_response.json()["data"]:
-            print(i["price"], i["local_departure"])
-            if i["price"] < 5000:
-                print(i)
+        for data in sheet_data:
+            search_params = {
+                "fly_from": self.from_place,
+                "fly_to": data["iataCode"],
+                "date_from": self.from_date,
+                "date_to": self.to_date,
+                "price_to": data["lowestPrice"],
+                "adults": "1",
+                "selected_cabins": "M",
+            }
 
+            response = req.get(url=search_url, headers=self.header,
+                               params=search_params).json()["data"]
+            if len(response) != 0:
+                if len(response) <= 5:
+                    self.update_flight(response, len(response))
+                else:
+                    self.update_flight(response, 5)
+        return self.flight_result
 
-test = FlightSearch()
-test.search_flight()
+    def update_flight(self, response, length):
+        for flight in range(length):
+            dep_date = response[flight]["local_departure"].split("T")[0]
+            dep_time = response[flight]["local_departure"].split("T")[1].split(".")[0]
+            ari_date = response[flight]["local_arrival"].split("T")[0]
+            ari_time = response[flight]["local_arrival"].split("T")[1].split(".")[0]
 
-# ------------------ OUTPUT format ------------------- #
-# {'search_id': 'c3f3a17f-7230-abb5-ded7-6d1e8b8da11a',
-#      'currency': 'INR', 'fx_rate': 80.722724, 'data': [
-#         {'id': '153804914b36000054410fd0_0',
-#          'flyFrom': 'CCU', 'flyTo': 'BOM',
-#          'cityFrom': 'Kolkata', 'cityCodeFrom': 'CCU',
-#          'cityTo': 'Mumbai', 'cityCodeTo': 'BOM',
-#          'countryFrom': {'code': 'IN', 'name': 'India'}, 'countryTo': {'code': 'IN', 'name': 'India'},
-#          'distance': 1667.3,
-#          'duration': {'departure': 10200, 'return': 0, 'total': 10200}, 'price': 11757,
-#          'conversion': {'EUR': 145.64672, 'INR': 11757},
-#          'fare': {'adults': 5878.5, 'children': 5878.5, 'infants': 5878.5}, 'bags_price': {'1': 0},
-#          'baglimit': {'hand_height': 35, 'hand_length': 55, 'hand_weight': 7, 'hand_width': 25,
-#                       'hold_dimensions_sum': 158, 'hold_height': 52, 'hold_length': 78, 'hold_weight': 15,
-#                       'hold_width': 28}, 'availability': {'seats': 2}, 'airlines': ['G8'],
-#
-#                       'route': [
-#             {'id': '153804914b36000054410fd0_0', 'combination_id': '153804914b36000054410fd0', 'flyFrom': 'CCU',
-#              'flyTo': 'BOM', 'cityFrom': 'Kolkata', 'cityCodeFrom': 'CCU', 'cityTo': 'Mumbai', 'cityCodeTo': 'BOM',
-#              'airline': 'G8', 'flight_no': 512, 'operating_carrier': 'G8', 'operating_flight_no': '512',
-#              'fare_basis': '', 'fare_category': 'M', 'fare_classes': 'Z', 'fare_family': '', 'return': 0,
-#              'bags_recheck_required': False, 'vi_connection': False, 'guarantee': False, 'equipment': None,
-#              'vehicle_type': 'aircraft', 'local_arrival': '2022-09-19T07:20:00.000Z',
-#              'utc_arrival': '2022-09-19T01:50:00.000Z', 'local_departure': '2022-09-19T04:30:00.000Z',
-#              'utc_departure': '2022-09-18T23:00:00.000Z'}],
+            self.flight_result.append({"From": response[flight]["cityFrom"],
+                                       "From Code": response[flight]["cityCodeFrom"],
+                                       "To": response[flight]["cityTo"],
+                                       "To Code": response[flight]["cityCodeTo"],
+                                       "Departure Date": dep_date,
+                                       "Departure Time": dep_time,
+                                       "Arrival Date": ari_date,
+                                       "Arrival Time" : ari_time,
+                                       "Price": response[flight]["price"],
+                                       })
 
-#          'facilitated_booking_available': True,
-#          'pnr_count': 1,
-#          'has_airport_change': False,
-#          'technical_stops': 0,
-#          'throw_away_ticketing': False,
-#          'hidden_city_ticketing': False,
-#          'virtual_interlining': False,
-#          'local_arrival': '2022-09-19T07:20:00.000Z',
-#          'local_departure': '2022-09-19T04:30:00.000Z',
+    def print_flights(self):
+        """
+            :return: Prints the data in a clean and presentable tabular format
+        """
+        data = self.flight_result
+        header = data[0].keys()
+        rows = [x.values() for x in data]
+        print(tb.tabulate(rows, header))

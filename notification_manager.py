@@ -1,3 +1,7 @@
+import config
+import  smtplib as smt
+
+
 class NotificationManager:
-    #This class is responsible for sending notifications with the deal flight details.
-    pass
+    def __init__(self, fl_list):
+        self.flight_list = fl_list
