@@ -64,7 +64,7 @@ class DataManager:
             "price": {
                 "city": city,
                 "iataCode": city_code,
-                "lowestPrice (indianRupees)": price
+                "lowestPrice": price
             }
         }
         sheet_add = req.post(self.url,

@@ -53,7 +53,7 @@ class FlightSearch:
                                        "Departure Date": dep_date,
                                        "Departure Time": dep_time,
                                        "Arrival Date": ari_date,
-                                       "Arrival Time" : ari_time,
+                                       "Arrival Time": ari_time,
                                        "Price": response[flight]["price"],
                                        })
 
