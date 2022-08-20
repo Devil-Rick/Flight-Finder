@@ -6,7 +6,6 @@ import register
 # -------------- Registering new Users --------------- #
 start = register.Register()
 m_list = start.register_user()
-print(m_list)
 
 # -------------- Adds , views and updates our choice of flights --------------- #
 dm = data_manager.DataManager()
