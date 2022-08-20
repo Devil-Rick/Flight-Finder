@@ -3,9 +3,10 @@ import smtplib as smt
 
 
 class NotificationManager:
-    def __init__(self, fl_list):
+    def __init__(self, fl_list, user_list):
         self.flight_list = fl_list
         self.send_list = []
+        self.receiver = user_list
 
     def send(self):
         for i in self.flight_list:
@@ -14,5 +15,6 @@ class NotificationManager:
         with smt.SMTP("smtp.gmail.com", port=587) as connection:
             connection.starttls()  # tls = Transfer Layer Security
             connection.login(user=config.MAIL_ID, password=config.PASSWORD)
-            connection.sendmail(from_addr=config.MAIL_ID, to_addrs="saptarshinaruto@gmail.com",
-                                msg=f"Subject:'Low Price Alert !!!!'\n\n{send}")
+            for email in self.receiver:
+                connection.sendmail(from_addr=config.MAIL_ID, to_addrs=email,
+                                    msg=f"Subject:'Low Price Alert !!!!'\n\n{send}")
